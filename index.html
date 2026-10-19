@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CIVIL TOXIC SHOOTING GAME</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#8db8c6;font-family:Arial,sans-serif;touch-action:none}
+canvas{display:block}
+#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;color:white}
+.box{background:#101820dc;border:1px solid #78ff91;border-radius:9px;padding:9px;font-size:13px}
+#health{width:100px;height:7px;background:#642c2c;margin-top:5px}
+#healthFill{width:100%;height:100%;background:#54ff6d}
+#controls{position:fixed;bottom:15px;left:0;right:0;display:flex;justify-content:space-between;align-items:end;padding:0 15px}
+#stick{width:130px;height:130px;border:2px solid #ffffff88;border-radius:50%;background:#16231d77;position:relative;touch-action:none}
+#knob{position:absolute;width:48px;height:48px;left:39px;top:39px;border-radius:50%;background:#c9ffd6bb;border:2px solid white}
+#buttons{display:flex;flex-direction:column;gap:10px;align-items:center}
+button{border:2px solid #d9ffe0;background:#17241ee8;color:white;border-radius:12px;padding:12px;font-weight:bold;font-size:14px;min-width:65px;min-height:48px;touch-action:none}
+#fire{width:78px;height:78px;border-radius:50%;background:#bd2929ed}
+#overlay{position:fixed;inset:0;background:#09120feF;display:flex;justify-content:center;align-items:center;text-align:center;color:white;padding:20px}
+#card{max-width:360px}
+h1{color:#74ff8a;font-size:29px}
+#start{background:#15893c;padding:15px 25px;font-size:18px}
+.note{font-size:13px;color:#c5d4c8;line-height:1.6}
+#aim{position:fixed;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);pointer-events:none;display:none}
+#aim:before,#aim:after{content:"";position:absolute;background:white;box-shadow:0 0 3px black}
+#aim:before{width:2px;height:18px;left:8px}
+#aim:after{height:2px;width:18px;top:8px}
+</style>
+</head>
+<body>
+<div id="hud">
+ <div class="box"><b>☠ CIVIL TOXIC</b><br>HEALTH <span id="hp">100</span><div id="health"><div id="healthFill"></div></div></div>
+ <div class="box">AMMO: <span id="ammo">30</span><br>ENEMIES: <span id="count">8</span><br>KILLS: <span id="kills">0</span></div>
+</div>
+<div id="aim"></div>
+<div id="controls">
+ <div id="stick"><div id="knob"></div></div>
+ <div id="buttons"><button id="reload">↻ RELOAD</button><button id="fire">FIRE 🔥</button></div>
+</div>
+<div id="overlay"><div id="card">
+ <h1>CIVIL TOXIC<br>SHOOTING GAME</h1>
+ <p>3D BATTLEFIELD</p>
+ <p class="note">Survive the battlefield. Move with the joystick, rotate the view by dragging the screen and tap FIRE to shoot enemies.</p>
+ <button id="start">▶ START GAME</button>
+ <p class="note">Mobile 3D Edition</p>
+</div></div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+
+const $=id=>document.getElementById(id);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x9bc6d7);
+scene.fog=new THREE.Fog(0x9bc6d7,45,150);
+
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,250);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=false;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xdcefff,0x53634a,2));
+const sun=new THREE.DirectionalLight(0xffedca,2.2);
+sun.position.set(-25,45,20);scene.add(sun);
+
+const mat=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness});
+const grass=mat(0x607e4c),road=mat(0x565a59),wall=mat(0x96978b),roof=mat(0x4a514e),trunk=mat(0x64462c),leaves=mat(0x286a38);
+const boxGeo=new THREE.BoxGeometry(1,1,1);
+
+function block(x,y,z,sx,sy,sz,material){
+ const o=new THREE.Mesh(boxGeo,material);
+ o.position.set(x,y,z);o.scale.set(sx,sy,sz);scene.add(o);return o;
+}
+block(0,-.3,0,180,.5,180,grass);
+block(0,-.02,0,11,.08,180,road);
+block(0,0,0,180,.08,11,road);
+
+function building(x,z,sx,sz){
+ block(x,sy(sx,sz),z,sx,5,sz,wall);
+ block(x,2.65,z,sx+0.4,.3,sz+.4,roof);
+ for(let wx=-sx/3;wx<sx/2;wx+=sx/1.7){
+   block(x+wx,1.5,z+sz/2+.02,.65,.8,.05,mat(0x354d55));
+ }
+}
+function sy(){return 2.5}
+building(-15,-16,10,9);
+building(17,-23,12,10);
+building(-25,17,9,12);
+building(25,18,11,9);
+building(-45,-35,13,11);
+building(46,-40,11,13);
+building(-49,43,12,12);
+building(48,46,13,11);
+
+function tree(x,z){
+ block(x,1.2,z,.55,2.4,.55,trunk);
+ const top=new THREE.Mesh(new THREE.ConeGeometry(2,5,6),leaves);
+ top.position.set(x,4,z);scene.add(top);
+}
+for(let i=0;i<85;i++){
+ const x=Math.random()*155-77,z=Math.random()*155-77;
+ if(Math.abs(x)<9||Math.abs(z)<9)continue;
+ if(scene.children.some(o=>o.userData.building))continue;
+ tree(x,z);
+}
+
+function makeCharacter(color){
+ const g=new THREE.Group();
+ const body=new THREE.Mesh(new THREE.CapsuleGeometry(.42,.9,4,7),mat(color));
+ body.position.y=1.25;g.add(body);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.3,8,7),mat(0xd5aa82));
+ head.position.y=2.05;g.add(head);
+ const gun=block(0,0,0,.2,.2,1.15,mat(0x252a2a));
+ gun.position.set(.42,1.45,-.65);g.add(gun);
+ return g;
+}
+const player=makeCharacter(0x297d4a);scene.add(player);
+player.position.set(0,0,5);
+
+const enemies=[];
+const bullets=[];
+let hp=100,ammo=30,kills=0,running=false,gameEnded=false;
+let moveX=0,moveY=0,yaw=0,pitch=.12,fireHeld=false;
+let lastShot=0,reloadTime=0,enemyClock=0;
+const clock=new THREE.Clock();
+
+function spawnEnemy(){
+ let x,z;
+ do{x=Math.random()*90-45;z=Math.random()*90-45}
+ while(Math.hypot(x-player.position.x,z-player.position.z)<16);
+ const g=makeCharacter(0xb72d32);g.position.set(x,0,z);
+ scene.add(g);enemies.push({g,hp:100,shot:1+Math.random()*2});
+}
+function reset(){
+ for(const e of enemies)scene.remove(e.g);
+ for(const b of bullets)scene.remove(b.mesh);
+ enemies.length=0;bullets.length=0;
+ hp=100;ammo=30;kills=0;yaw=0;pitch=.12;
+ player.position.set(0,0,5);player.rotation.y=0;
+ for(let i=0;i<8;i++)spawnEnemy();
+ running=true;gameEnded=false;clock.start();
+ $('overlay').style.display='none';$('aim').style.display='block';
+ updateHUD();
+}
+function updateHUD(){
+ $('hp').textContent=Math.max(0,Math.ceil(hp));
+ $('healthFill').style.width=Math.max(0,hp)+'%';
+ $('ammo').textContent=ammo;$('count').textContent=enemies.length;
+ $('kills').textContent=kills;
+}
+function finish(win){
+ if(gameEnded)return;
+ running=false;gameEnded=true;$('aim').style.display='none';
+ $('overlay').style.display='flex';
+ $('card').innerHTML=`<h1>${win?'🏆 VICTORY':'☠ GAME OVER'}</h1>
+ <p>${win?'ALL ENEMIES DEFEATED':'YOU WERE ELIMINATED'}</p>
+ <p>KILLS: ${kills}</p><button id="start">↻ PLAY AGAIN</button>
+ <p class="note">CIVIL TOXIC SHOOTING GAME</p>`;
+ $('start').onclick=reset;
+}
+function shoot(){
+ const now=performance.now();
+ if(!running||ammo<=0||now-lastShot<220)return;
+ lastShot=now;ammo--;
+ const dir=new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(pitch,yaw,0,'YXZ')).normalize();
+ const origin=player.position.clone().add(new THREE.Vector3(0,1.5,0));
+ const mesh=new THREE.Mesh(new THREE.SphereGeometry(.09,6,5),mat(0xffee8a));
+ mesh.position.copy(origin);scene.add(mesh);
+ bullets.push({mesh,dir,life:1.4});
+ updateHUD();
+}
+function reload(){if(running){ammo=30;updateHUD()}}
+$('fire').addEventListener('pointerdown',e=>{e.preventDefault();fireHeld=true;shoot()});
+addEventListener('pointerup',()=>fireHeld=false);
+$('reload').addEventListener('click',reload);
+$('start').onclick=reset;
+
+const stick=$('stick'),knob=$('knob');
+let stickId=null,center={x:0,y:0};
+stick.addEventListener('pointerdown',e=>{
+ e.preventDefault();stickId=e.pointerId;stick.setPointerCapture(stickId);
+ const r=stick.getBoundingClientRect();center={x:r.left+r.width/2,y:r.top+r.height/2};
+ moveStick(e);
+});
+function moveStick(e){
+ const dx=e.clientX-center.x,dy=e.clientY-center.y;
+ const d=Math.hypot(dx,dy),max=42,k=Math.min(1,max/(d||1));
+ moveX=dx*k/max;moveY=dy*k/max;
+ knob.style.left=(39+moveX*40)+'px';knob.style.top=(39+moveY*40)+'px';
+}
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)moveStick(e)});
+function stopStick(){stickId=null;moveX=moveY=0;knob.style.left='39px';knob.style.top='39px'}
+stick.addEventListener('pointerup',stopStick);stick.addEventListener('pointercancel',stopStick);
+
+let lookId=null,lookX=0,lookY=0;
+renderer.domElement.addEventListener('pointerdown',e=>{
+ if(e.clientX<innerWidth*.32&&e.clientY>innerHeight*.5)return;
+ lookId=e.pointerId;lookX=e.clientX;lookY=e.clientY;
+});
+renderer.domElement.addEventListener('pointermove',e=>{
+ if(lookId!==e.pointerId||!running)return;
+ yaw-=(e.clientX-lookX)*.006;
+ pitch=Math.max(-.25,Math.min(.65,pitch+(e.clientY-lookY)*.003));
+ lookX=e.clientX;lookY=e.clientY;
+});
+addEventListener('pointerup',e=>{if(lookId===e.pointerId)lookId=null});
+
+function update(dt){
+ if(!running)return;
+ const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+ const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+ const movement=forward.clone().multiplyScalar(-moveY).add(right.multiplyScalar(moveX));
+ if(movement.lengthSq()>0){
+  movement.normalize().multiplyScalar(7*dt);
+  player.position.add(movement);
+  player.rotation.y=Math.atan2(-movement.x,-movement.z);
+ }
+ player.position.x=THREE.MathUtils.clamp(player.position.x,-83,83);
+ player.position.z=THREE.MathUtils.clamp(player.position.z,-83,83);
+
+ if(fireHeld)shoot();
+
+ for(let i=bullets.length-1;i>=0;i--){
+  const b=bullets[i];b.mesh.position.addScaledVector(b.dir,28*dt);b.life-=dt;
+  let hit=false;
+  for(let j=enemies.length-1;j>=0;j--){
+   const e=enemies[j];
+   if(b.mesh.position.distanceTo(e.g.position.clone().add(new THREE.Vector3(0,1,0)))<1.15){
+    e.hp-=50;hit=true;
+    if(e.hp<=0){scene.remove(e.g);enemies.splice(j,1);kills++;updateHUD()}
+    break;
+   }
+  }
+  if(hit||b.life<=0){scene.remove(b.mesh);bullets.splice(i,1)}
+ }
+ for(const e of enemies){
+  const delta=player.position.clone().sub(e.g.position);delta.y=0;
+  const d=delta.length();
+  if(d>8){delta.normalize();e.g.position.addScaledVector(delta,e.g.userData.speed*dt||1.7*dt)}
+  e.g.rotation.y=Math.atan2(-delta.x,-delta.z);
+  e.shot-=dt;
+  if(d<25&&e.shot<=0){
+   hp-=8;e.shot=1.3;
+   updateHUD();
+   if(hp<=0){finish(false);return}
+  }
+ }
+ if(enemies.length===0){finish(true);return}
+ const target=player.position.clone().add(new THREE.Vector3(0,1.4,0));
+ const offset=new THREE.Vector3(0,3.1,7.5);
+ offset.applyEuler(new THREE.Euler(-pitch,yaw,0,'YXZ'));
+ camera.position.copy(target).add(offset);
+ camera.lookAt(target);
+}
+function frame(){
+ requestAnimationFrame(frame);
+ const dt=Math.min(clock.getDelta(),.04);
+ if(running)update(dt);
+ renderer.render(scene,camera);
+}
+frame();
+
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+   </html>
