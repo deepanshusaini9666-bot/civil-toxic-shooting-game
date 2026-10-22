@@ -4,652 +4,486 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>CIVIL TOXIC SHOOTING GAME</title>
-
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#111;color:white;font-family:Arial,sans-serif;touch-action:none}
+body{margin:0;overflow:hidden;background:#101820;color:white;font-family:Arial}
 canvas{display:block}
-#hud{position:fixed;top:10px;left:10px;z-index:5;background:#0009;padding:10px;border-radius:10px;font-size:13px}
-#healthBar{width:130px;height:8px;background:#555;margin-top:5px}
-#healthFill{height:100%;width:100%;background:#22dd55}
-#crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;pointer-events:none}
-#controls{position:fixed;inset:0;pointer-events:none}
-button{border:1px solid #ffffff66;background:#111c;color:white;border-radius:14px;font-weight:bold;touch-action:none}
-#stick{position:absolute;left:22px;bottom:35px;width:120px;height:120px;border-radius:50%;background:#ffffff22;border:2px solid #ffffff66;pointer-events:auto}
-#knob{position:absolute;left:35px;top:35px;width:46px;height:46px;border-radius:50%;background:#ffffff88}
-.action{position:absolute;width:67px;height:55px;pointer-events:auto;font-size:12px}
-#fire{right:25px;bottom:75px;width:82px;height:82px;border-radius:50%;background:#c62828dd}
-#jump{right:120px;bottom:40px}
-#reload{right:120px;bottom:105px}
-#med{right:25px;bottom:170px}
-#crouch{right:120px;bottom:170px}
-#status{position:fixed;top:10px;right:10px;text-align:right;background:#0009;padding:9px;border-radius:10px;font-size:12px}
-#message{position:fixed;left:50%;top:45%;transform:translate(-50%,-50%);font-size:24px;font-weight:bold;text-align:center;pointer-events:none}
-#start{position:fixed;inset:0;background:#000d;z-index:10;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px}
-#start h1{font-size:27px;color:#ff4747}
-#start button{padding:15px 30px;background:#a90000;font-size:18px}
-#help{max-width:340px;line-height:1.6;font-size:13px;color:#ddd}
+#hud{position:fixed;top:8px;left:8px;background:#000b;padding:10px;border-radius:10px;z-index:2;font-size:13px}
+#stats{position:fixed;top:8px;right:8px;background:#000b;padding:10px;border-radius:10px;z-index:2;text-align:right;font-size:13px}
+#start{position:fixed;inset:0;z-index:10;background:#111e;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+#start h1{color:#ff4b4b}
+#start button{font-size:22px;padding:15px 35px;background:#c00;color:white;border:0;border-radius:12px}
+#status{font-size:13px;color:#ffe082;max-width:90%;overflow-wrap:anywhere}
+#crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:28px;pointer-events:none}
+#stick{position:fixed;left:22px;bottom:30px;width:115px;height:115px;border-radius:50%;background:#ffffff22;border:2px solid #ffffff88;z-index:3;touch-action:none}
+#knob{position:absolute;left:33px;top:33px;width:45px;height:45px;border-radius:50%;background:#ffffff99}
+.btn{position:fixed;z-index:3;color:white;background:#151515cc;border:1px solid #aaa;border-radius:12px;padding:15px 10px;font-weight:bold;touch-action:manipulation}
+#fire{right:20px;bottom:65px;width:82px;height:82px;border-radius:50%;background:#b90000}
+#reload{right:115px;bottom:110px}
+#jump{right:115px;bottom:40px}
+#med{right:20px;bottom:165px}
+#crouch{right:115px;bottom:180px}
+#message{position:fixed;top:43%;width:100%;text-align:center;font-size:24px;font-weight:bold;pointer-events:none;z-index:4}
 </style>
 </head>
 <body>
 
 <div id="hud">
   <b>CIVIL TOXIC</b><br>
-  ❤️ <span id="hp">100</span> HP
-  <div id="healthBar"><div id="healthFill"></div></div>
-  🔫 <span id="ammo">30</span> / <span id="reserve">120</span>
+  ❤️ <span id="hp">100</span> HP<br>
+  🔫 <span id="ammo">30</span>/<span id="reserve">120</span>
 </div>
 
-<div id="status">
+<div id="stats">
   KILLS: <span id="kills">0</span><br>
-  ENEMIES: <span id="remaining">8</span><br>
-  <span id="weapon">ASSAULT RIFLE</span>
+  ENEMIES: <span id="remaining">6</span>
 </div>
 
 <div id="crosshair">+</div>
 <div id="message"></div>
 
-<div id="controls">
-  <div id="stick"><div id="knob"></div></div>
-  <button class="action" id="fire">FIRE</button>
-  <button class="action" id="reload">RELOAD</button>
-  <button class="action" id="jump">JUMP</button>
-  <button class="action" id="med">MEDKIT</button>
-  <button class="action" id="crouch">CROUCH</button>
-</div>
+<div id="stick"><div id="knob"></div></div>
+<button class="btn" id="fire">FIRE</button>
+<button class="btn" id="reload">RELOAD</button>
+<button class="btn" id="jump">JUMP</button>
+<button class="btn" id="med">MEDKIT</button>
+<button class="btn" id="crouch">CROUCH</button>
 
 <div id="start">
   <h1>CIVIL TOXIC<br>SHOOTING GAME</h1>
   <p>3D SOLDIER COMBAT</p>
-  <div id="help">
-    Joystick se move karo.<br>
-    Screen ke right side ko drag karke camera ghumao.<br>
-    FIRE dabakar enemies ko shoot karo.<br>
-    Soldier model load hone ke liye internet zaroori hai.
-  </div>
-  <br>
+  <p>Move: joystick | Look: drag screen | Shoot: FIRE</p>
   <button id="play">PLAY GAME</button>
-  <p id="loadStatus">3D game loading...</p>
+  <p id="status">Game ready. Press PLAY GAME.</p>
 </div>
 
 <script type="module">
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+const statusEl=document.getElementById('status');
+const startScreen=document.getElementById('start');
+const messageEl=document.getElementById('message');
 
-import { GLTFLoader } from
-'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
+let started=false;
+let scene,camera,renderer,THREE;
+let player,soldier=null;
+let enemies=[];
+let health=100,ammo=30,reserve=120,kills=0,medkits=3;
+let moveX=0,moveY=0,yaw=0,pitch=0;
+let firing=false,crouching=false,jumping=false;
+let jumpVelocity=0,lastShot=0;
 
-/* ---------------- SCENE ---------------- */
+function message(text){
+  messageEl.textContent=text;
+  if(text)setTimeout(()=>{
+    if(messageEl.textContent===text)messageEl.textContent='';
+  },1300);
+}
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x8bb4cb);
-scene.fog = new THREE.Fog(0x8bb4cb, 45, 150);
+function hud(){
+  document.getElementById('hp').textContent=Math.ceil(health);
+  document.getElementById('ammo').textContent=ammo;
+  document.getElementById('reserve').textContent=reserve;
+  document.getElementById('kills').textContent=kills;
+  document.getElementById('remaining').textContent=
+    enemies.filter(e=>e.alive).length;
+}
 
-const camera = new THREE.PerspectiveCamera(
-  70, innerWidth/innerHeight, 0.1, 300
-);
-
-const renderer = new THREE.WebGLRenderer({
-  antialias:false,
-  powerPreference:'low-power'
-});
-
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-renderer.shadowMap.enabled=false;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-document.body.prepend(renderer.domElement);
-
-scene.add(new THREE.HemisphereLight(0xffffff,0x46533c,2));
-
-const sun=new THREE.DirectionalLight(0xffffff,2);
-sun.position.set(30,60,20);
-scene.add(sun);
-
-/* ---------------- MATERIALS ---------------- */
-
-function material(color){
+function makeMaterial(color){
   return new THREE.MeshStandardMaterial({color});
 }
 
-const groundMat=material(0x657451);
-const roadMat=material(0x353a40);
-const wallMat=material(0xb0a58b);
-const treeMat=material(0x315d32);
-const trunkMat=material(0x62452c);
-
-/* ---------------- MAP ---------------- */
-
-const ground=new THREE.Mesh(
-  new THREE.PlaneGeometry(200,200),groundMat
-);
-ground.rotation.x=-Math.PI/2;
-ground.position.y=-0.05;
-scene.add(ground);
-
-function box(x,y,z,w,h,d,color,parent=scene){
-  const mesh=new THREE.Mesh(
-    new THREE.BoxGeometry(w,h,d),material(color)
+function addBox(x,y,z,w,h,d,color,parent=scene){
+  const obj=new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d),makeMaterial(color)
   );
-  mesh.position.set(x,y,z);
-  parent.add(mesh);
-  return mesh;
+  obj.position.set(x,y,z);
+  parent.add(obj);
+  return obj;
 }
 
-box(0,0.01,0,8,0.03,180,0x3d4143);
-box(0,0.02,0,180,0.03,8,0x3d4143);
-
-for(let i=-80;i<=80;i+=8){
-  box(0,0.04,i,0.15,0.02,3,0xd9d3a0);
-  box(i,0.04,0,3,0.02,0.15,0xd9d3a0);
-}
-
-/* Buildings */
-
-for(let i=0;i<28;i++){
-  const x=(Math.random()-0.5)*130;
-  const z=(Math.random()-0.5)*130;
-
-  if(Math.abs(x)<13 || Math.abs(z)<13) continue;
-
-  const w=5+Math.random()*7;
-  const h=3+Math.random()*5;
-  const d=5+Math.random()*7;
-
-  box(x,h/2,z,w,h,d,0x77786e);
-  box(x,h+0.12,z,w+0.2,0.25,d+0.2,0x514e48);
-}
-
-/* Trees */
-
-for(let i=0;i<65;i++){
-  const x=(Math.random()-0.5)*160;
-  const z=(Math.random()-0.5)*160;
-
-  if(Math.abs(x)<10 && Math.abs(z)<10) continue;
-
-  const trunk=new THREE.Mesh(
-    new THREE.CylinderGeometry(0.18,0.25,1.8,5),trunkMat
+function createMap(){
+  const ground=new THREE.Mesh(
+    new THREE.PlaneGeometry(180,180),
+    makeMaterial(0x647451)
   );
-  trunk.position.set(x,0.9,z);
-  scene.add(trunk);
+  ground.rotation.x=-Math.PI/2;
+  scene.add(ground);
 
-  const leaves=new THREE.Mesh(
-    new THREE.ConeGeometry(1.3,3.2,6),treeMat
-  );
-  leaves.position.set(x,2.8,z);
-  scene.add(leaves);
-}
+  addBox(0,0.02,0,8,0.04,180,0x414141);
+  addBox(0,0.03,0,180,0.04,8,0x414141);
 
-/* ---------------- PLAYER ---------------- */
-
-const player=new THREE.Group();
-scene.add(player);
-player.position.set(0,0,5);
-
-/* Hidden placeholders keep the player group compatible
-   with basic crouch logic. The GLB is the visible soldier. */
-
-const body=new THREE.Mesh(
-  new THREE.BoxGeometry(0.1,0.1,0.1),
-  new THREE.MeshBasicMaterial({visible:false})
-);
-body.position.y=1;
-body.visible=false;
-player.add(body);
-
-let soldierModel=null;
-let soldierBaseScale=1;
-let crouching=false;
-let jumping=false;
-let jumpVelocity=0;
-
-const modelURL=
-'https://raw.githubusercontent.com/deepanshusaini9666-bot/civil-toxic-shooting-game/main/aiprintgen_Realistic%20Armored%20Soldier%20Character%20Model%20-%20Rigged-preview.glb';
-
-const loadStatus=document.getElementById('loadStatus');
-
-const loader=new GLTFLoader();
-
-loader.load(
-  modelURL,
-  function(gltf){
-    soldierModel=gltf.scene;
-
-    const initialBounds=new THREE.Box3().setFromObject(soldierModel);
-    const initialSize=initialBounds.getSize(new THREE.Vector3());
-
-    if(initialSize.y>0){
-      soldierBaseScale=2.0/initialSize.y;
-      soldierModel.scale.setScalar(soldierBaseScale);
-    }
-
-    soldierModel.updateMatrixWorld(true);
-
-    const bounds=new THREE.Box3().setFromObject(soldierModel);
-    const center=bounds.getCenter(new THREE.Vector3());
-
-    soldierModel.position.x-=center.x;
-    soldierModel.position.z-=center.z;
-    soldierModel.position.y-=bounds.min.y;
-
-    player.add(soldierModel);
-
-    loadStatus.textContent='Soldier model loaded!';
-    console.log('Soldier loaded successfully');
-  },
-  undefined,
-  function(error){
-    console.error('Soldier model load failed:',error);
-    loadStatus.textContent=
-      'Soldier load failed. Check internet and model URL.';
+  for(let i=0;i<22;i++){
+    const x=(Math.random()-.5)*120;
+    const z=(Math.random()-.5)*120;
+    if(Math.abs(x)<12||Math.abs(z)<12)continue;
+    const w=5+Math.random()*5,h=3+Math.random()*4,d=5+Math.random()*5;
+    addBox(x,h/2,z,w,h,d,0x8b887b);
+    addBox(x,h+0.1,z,w+.2,.2,d+.2,0x4d4b48);
   }
-);
 
-/* ---------------- CAMERA ---------------- */
-
-let yaw=0;
-let pitch=-0.12;
-
-function updateCamera(){
-  const distance=6;
-  const targetY=crouching?1.1:1.55;
-
-  camera.position.set(
-    player.position.x+Math.sin(yaw)*distance,
-    player.position.y+targetY+2.2+Math.sin(pitch)*2,
-    player.position.z+Math.cos(yaw)*distance
-  );
-
-  camera.lookAt(
-    player.position.x,
-    player.position.y+targetY,
-    player.position.z
-  );
+  for(let i=0;i<45;i++){
+    const x=(Math.random()-.5)*150;
+    const z=(Math.random()-.5)*150;
+    const trunk=new THREE.Mesh(
+      new THREE.CylinderGeometry(.15,.22,1.5,5),
+      makeMaterial(0x62432b)
+    );
+    trunk.position.set(x,.75,z);
+    scene.add(trunk);
+    const leaves=new THREE.Mesh(
+      new THREE.ConeGeometry(1.25,2.8,6),
+      makeMaterial(0x315b32)
+    );
+    leaves.position.set(x,2.5,z);
+    scene.add(leaves);
+  }
 }
 
-/* ---------------- ENEMIES ---------------- */
+function createPlayer(){
+  player=new THREE.Group();
+  scene.add(player);
+  player.position.set(0,0,5);
 
-const enemies=[];
-let kills=0;
+  // Temporary visible soldier if GLB does not load
+  const body=new THREE.Mesh(
+    new THREE.CapsuleGeometry(.38,.8,4,8),
+    makeMaterial(0x657047)
+  );
+  body.position.y=1.15;
+  player.add(body);
 
-function makeEnemy(x,z){
+  const head=new THREE.Mesh(
+    new THREE.SphereGeometry(.24,10,8),
+    makeMaterial(0xb98765)
+  );
+  head.position.y=1.9;
+  player.add(head);
+
+  addBox(.35,1.35,-.4,.14,.14,.8,0x202020,player);
+}
+
+function loadSoldier(){
+  statusEl.textContent='Loading soldier model...';
+
+  import('https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js')
+  .then(({GLTFLoader})=>{
+    const loader=new GLTFLoader();
+
+    const url='https://raw.githubusercontent.com/deepanshusaini9666-bot/civil-toxic-shooting-game/main/aiprintgen_Realistic%20Armored%20Soldier%20Character%20Model%20-%20Rigged-preview.glb';
+
+    loader.load(url,gltf=>{
+      if(soldier&&player)player.remove(soldier);
+
+      soldier=gltf.scene;
+      const bounds=new THREE.Box3().setFromObject(soldier);
+      const size=bounds.getSize(new THREE.Vector3());
+
+      if(size.y>0)soldier.scale.setScalar(2/size.y);
+
+      soldier.updateMatrixWorld(true);
+      const b=new THREE.Box3().setFromObject(soldier);
+      const c=b.getCenter(new THREE.Vector3());
+
+      soldier.position.x-=c.x;
+      soldier.position.z-=c.z;
+      soldier.position.y-=b.min.y;
+
+      player.add(soldier);
+      statusEl.textContent='Soldier loaded successfully!';
+    },undefined,error=>{
+      console.error(error);
+      statusEl.textContent='Soldier file failed. Using temporary soldier.';
+    });
+  })
+  .catch(error=>{
+    console.error(error);
+    statusEl.textContent='Soldier loader failed. Using temporary soldier.';
+  });
+}
+
+function createEnemy(x,z){
   const group=new THREE.Group();
   group.position.set(x,0,z);
   scene.add(group);
 
-  const bodyMesh=new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.4,0.8,3,6),
-    material(0x9c3028)
+  const body=new THREE.Mesh(
+    new THREE.CapsuleGeometry(.35,.7,3,6),
+    makeMaterial(0x9d3028)
   );
-  bodyMesh.position.y=1.15;
-  group.add(bodyMesh);
+  body.position.y=1.05;
+  group.add(body);
 
   const head=new THREE.Mesh(
-    new THREE.SphereGeometry(0.24,8,6),
-    material(0xb88b68)
+    new THREE.SphereGeometry(.22,8,6),
+    makeMaterial(0xb58a69)
   );
-  head.position.y=1.95;
+  head.position.y=1.8;
   group.add(head);
 
-  const gunMesh=box(0.38,1.4,-0.25,0.12,0.12,0.7,0x222222,group);
-
-  enemies.push({
-    group,
-    hp:100,
-    alive:true,
-    attackTimer:0
-  });
+  enemies.push({group,alive:true,hp:100,cooldown:0});
 }
 
-for(let i=0;i<8;i++){
-  let x,z;
-  do{
-    x=(Math.random()-0.5)*70;
-    z=(Math.random()-0.5)*70;
-  }while(Math.hypot(x,z)<14);
-
-  makeEnemy(x,z);
+function setupEnemies(){
+  for(let i=0;i<6;i++){
+    let x,z;
+    do{
+      x=(Math.random()-.5)*60;
+      z=(Math.random()-.5)*60;
+    }while(Math.hypot(x,z)<14);
+    createEnemy(x,z);
+  }
 }
 
-/* ---------------- SHOOTING ---------------- */
-
-let ammo=30;
-let reserve=120;
-let health=100;
-let medkits=3;
-let reloading=false;
-let killsCount=0;
-
-const raycaster=new THREE.Raycaster();
+function updateCamera(){
+  if(!camera||!player)return;
+  camera.position.set(
+    player.position.x+Math.sin(yaw)*5,
+    player.position.y+(crouching?2.5:3.2)+Math.sin(pitch),
+    player.position.z+Math.cos(yaw)*5
+  );
+  camera.lookAt(
+    player.position.x,
+    player.position.y+(crouching?1:1.5),
+    player.position.z
+  );
+}
 
 function shoot(){
-  if(!started || health<=0 || reloading) return;
-
-  if(ammo<=0){
-    showMessage('RELOAD!');
-    return;
-  }
-
+  if(!started||health<=0)return;
+  if(ammo<=0){message('RELOAD!');return}
   ammo--;
-  updateHUD();
+  hud();
 
-  raycaster.setFromCamera(new THREE.Vector2(0,0),camera);
+  const ray=new THREE.Raycaster();
+  ray.setFromCamera(new THREE.Vector2(0,0),camera);
+  const objects=[];
+  enemies.filter(e=>e.alive).forEach(e=>{
+    e.group.traverse(o=>{if(o.isMesh)objects.push(o)});
+  });
 
-  const targets=[];
-
-  for(const enemy of enemies){
-    if(!enemy.alive) continue;
-    enemy.group.traverse(obj=>{
-      if(obj.isMesh) targets.push(obj);
-    });
-  }
-
-  const hits=raycaster.intersectObjects(targets,false);
-
+  const hits=ray.intersectObjects(objects,false);
   if(hits.length){
-    const hit=hits[0].object;
-    const enemy=enemies.find(e=>{
+    const target=enemies.find(e=>{
       let found=false;
-      e.group.traverse(o=>{if(o===hit)found=true});
+      e.group.traverse(o=>{if(o===hits[0].object)found=true});
       return found;
     });
-
-    if(enemy && enemy.alive){
-      enemy.hp-=34;
-
-      if(enemy.hp<=0){
-        enemy.alive=false;
-        scene.remove(enemy.group);
-        killsCount++;
-        document.getElementById('kills').textContent=killsCount;
-        showMessage('ENEMY ELIMINATED');
+    if(target){
+      target.hp-=34;
+      if(target.hp<=0){
+        target.alive=false;
+        scene.remove(target.group);
+        kills++;
+        message('ENEMY ELIMINATED');
+        hud();
       }
     }
   }
 }
 
 function reload(){
-  if(reloading || ammo===30 || reserve<=0) return;
-
-  reloading=true;
-  showMessage('RELOADING...');
-
+  if(ammo>=30||reserve<=0)return;
+  message('RELOADING...');
   setTimeout(()=>{
-    const amount=Math.min(30-ammo,reserve);
-    ammo+=amount;
-    reserve-=amount;
-    reloading=false;
-    updateHUD();
-    showMessage('');
-  },1300);
+    const n=Math.min(30-ammo,reserve);
+    ammo+=n;reserve-=n;hud();
+  },1000);
 }
 
-/* ---------------- INPUT ---------------- */
-
-let started=false;
-let moveX=0,moveY=0;
-let firing=false;
-let lastShot=0;
-
-const stick=document.getElementById('stick');
-const knob=document.getElementById('knob');
-
-let stickActive=false;
-let stickCenter={x:0,y:0};
-
-function resetStick(){
-  stickActive=false;
-  moveX=0;
-  moveY=0;
-  knob.style.left='35px';
-  knob.style.top='35px';
+function startGame(){
+  if(started)return;
+  started=true;
+  startScreen.style.display='none';
+  message('GAME STARTED!');
+  statusEl.textContent='Game running';
 }
 
-stick.addEventListener('pointerdown',e=>{
-  stick.setPointerCapture(e.pointerId);
-  stickActive=true;
-
-  const r=stick.getBoundingClientRect();
-  stickCenter={x:r.left+r.width/2,y:r.top+r.height/2};
-
-  moveStick(e);
-});
-
-function moveStick(e){
-  if(!stickActive)return;
-
-  let dx=e.clientX-stickCenter.x;
-  let dy=e.clientY-stickCenter.y;
-
-  const max=37;
-  const length=Math.hypot(dx,dy);
-
-  if(length>max){
-    dx=dx/length*max;
-    dy=dy/length*max;
-  }
-
-  moveX=dx/max;
-  moveY=dy/max;
-
-  knob.style.left=(35+dx)+'px';
-  knob.style.top=(35+dy)+'px';
-}
-
-stick.addEventListener('pointermove',moveStick);
-stick.addEventListener('pointerup',resetStick);
-stick.addEventListener('pointercancel',resetStick);
+document.getElementById('play').addEventListener('click',startGame);
 
 document.getElementById('fire').addEventListener('pointerdown',e=>{
-  e.preventDefault();
-  firing=true;
-  shoot();
+  e.preventDefault();firing=true;shoot();
 });
-
-function stopFire(){firing=false}
-
-document.getElementById('fire').addEventListener('pointerup',stopFire);
-document.getElementById('fire').addEventListener('pointercancel',stopFire);
-document.getElementById('fire').addEventListener('pointerleave',stopFire);
+['pointerup','pointercancel','pointerleave'].forEach(type=>{
+  document.getElementById('fire').addEventListener(type,()=>firing=false);
+});
 
 document.getElementById('reload').addEventListener('click',reload);
 
 document.getElementById('jump').addEventListener('click',()=>{
-  if(!jumping && started){
-    jumping=true;
-    jumpVelocity=5.5;
-  }
+  if(!jumping){jumping=true;jumpVelocity=5}
 });
 
 document.getElementById('crouch').addEventListener('click',()=>{
   crouching=!crouching;
-
-  if(soldierModel){
-    soldierModel.scale.set(
-      soldierBaseScale,
-      soldierBaseScale*(crouching?0.7:1),
-      soldierBaseScale
-    );
-  }
-
-  document.getElementById('crouch').textContent=
-    crouching?'STAND':'CROUCH';
+  document.getElementById('crouch').textContent=crouching?'STAND':'CROUCH';
 });
 
 document.getElementById('med').addEventListener('click',()=>{
-  if(medkits>0 && health<100 && started){
+  if(medkits>0&&health<100){
     medkits--;
     health=Math.min(100,health+40);
-    updateHUD();
-    showMessage('MEDKIT USED');
-  }else if(medkits===0){
-    showMessage('NO MEDKITS');
+    hud();message('MEDKIT USED');
   }
 });
 
-/* Drag right side of screen to rotate camera */
+/* Joystick */
 
-let lookActive=false;
-let lastX=0,lastY=0;
+const stick=document.getElementById('stick');
+const knob=document.getElementById('knob');
+let stickPointer=null;
 
-renderer.domElement.addEventListener('pointerdown',e=>{
-  if(e.clientX>innerWidth*0.35){
-    lookActive=true;
-    lastX=e.clientX;
-    lastY=e.clientY;
-  }
+stick.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  stickPointer=e.pointerId;
+  stick.setPointerCapture(e.pointerId);
+  moveStick(e);
 });
 
-renderer.domElement.addEventListener('pointermove',e=>{
-  if(!lookActive)return;
-
-  const dx=e.clientX-lastX;
-  const dy=e.clientY-lastY;
-
-  yaw-=dx*0.006;
-  pitch=Math.max(-0.7,Math.min(0.6,pitch+dy*0.003));
-
-  lastX=e.clientX;
-  lastY=e.clientY;
+stick.addEventListener('pointermove',e=>{
+  if(e.pointerId===stickPointer)moveStick(e);
 });
 
-window.addEventListener('pointerup',()=>lookActive=false);
-window.addEventListener('pointercancel',()=>lookActive=false);
-
-/* ---------------- HUD ---------------- */
-
-function updateHUD(){
-  document.getElementById('hp').textContent=Math.ceil(health);
-  document.getElementById('healthFill').style.width=health+'%';
-  document.getElementById('ammo').textContent=ammo;
-  document.getElementById('reserve').textContent=reserve;
-  document.getElementById('remaining').textContent=
-    enemies.filter(e=>e.alive).length;
+function moveStick(e){
+  const r=stick.getBoundingClientRect();
+  let dx=e.clientX-(r.left+r.width/2);
+  let dy=e.clientY-(r.top+r.height/2);
+  const max=34,len=Math.hypot(dx,dy);
+  if(len>max){dx=dx/len*max;dy=dy/len*max}
+  moveX=dx/max;moveY=dy/max;
+  knob.style.left=(33+dx)+'px';
+  knob.style.top=(33+dy)+'px';
 }
 
-let messageTimer;
+function releaseStick(){
+  stickPointer=null;moveX=0;moveY=0;
+  knob.style.left='33px';knob.style.top='33px';
+}
+stick.addEventListener('pointerup',releaseStick);
+stick.addEventListener('pointercancel',releaseStick);
 
-function showMessage(msg){
-  const el=document.getElementById('message');
-  el.textContent=msg;
-  clearTimeout(messageTimer);
+/* Camera drag */
 
-  if(msg){
-    messageTimer=setTimeout(()=>el.textContent='',1200);
-  }
+let looking=false,lastX=0,lastY=0;
+rendererSafeListeners();
+
+function rendererSafeListeners(){
+  document.addEventListener('pointerdown',e=>{
+    if(e.clientX>innerWidth*.38&&
+       !e.target.closest('button')&&
+       !e.target.closest('#stick')){
+      looking=true;lastX=e.clientX;lastY=e.clientY;
+    }
+  });
+  document.addEventListener('pointermove',e=>{
+    if(!looking)return;
+    yaw-=(e.clientX-lastX)*.006;
+    pitch=Math.max(-.5,Math.min(.5,pitch+(e.clientY-lastY)*.003));
+    lastX=e.clientX;lastY=e.clientY;
+  });
+  document.addEventListener('pointerup',()=>looking=false);
+  document.addEventListener('pointercancel',()=>looking=false);
 }
 
-/* ---------------- GAME LOOP ---------------- */
-
-let previous=performance.now();
-
-function animate(now){
+function animate(){
   requestAnimationFrame(animate);
+  if(!renderer||!scene||!camera)return;
 
-  const dt=Math.min((now-previous)/1000,0.05);
-  previous=now;
+  const dt=.016;
 
-  if(started && health>0){
-
-    /* Player movement */
-
-    const speed=crouching?2.0:4.2;
-
-    const forwardX=-Math.sin(yaw);
-    const forwardZ=-Math.cos(yaw);
-
-    const rightX=Math.cos(yaw);
-    const rightZ=-Math.sin(yaw);
-
-    player.position.x+=
-      (forwardX*(-moveY)+rightX*moveX)*speed*dt;
-
-    player.position.z+=
-      (forwardZ*(-moveY)+rightZ*moveX)*speed*dt;
-
-    player.position.x=THREE.MathUtils.clamp(player.position.x,-92,92);
-    player.position.z=THREE.MathUtils.clamp(player.position.z,-92,92);
-
-    /* Jump */
+  if(started&&health>0){
+    const speed=crouching?2:4;
+    player.position.x+=(-Math.sin(yaw)*(-moveY)+Math.cos(yaw)*moveX)*speed*dt;
+    player.position.z+=(-Math.cos(yaw)*(-moveY)-Math.sin(yaw)*moveX)*speed*dt;
+    player.position.x=THREE.MathUtils.clamp(player.position.x,-85,85);
+    player.position.z=THREE.MathUtils.clamp(player.position.z,-85,85);
 
     if(jumping){
       player.position.y+=jumpVelocity*dt;
       jumpVelocity-=12*dt;
-
       if(player.position.y<=0){
-        player.position.y=0;
-        jumping=false;
-        jumpVelocity=0;
+        player.position.y=0;jumping=false;jumpVelocity=0;
       }
     }
 
-    /* Face direction */
-
-    player.rotation.y=yaw+Math.PI;
-
-    /* Enemies chase player */
-
-    for(const enemy of enemies){
-      if(!enemy.alive)continue;
-
-      const dx=player.position.x-enemy.group.position.x;
-      const dz=player.position.z-enemy.group.position.z;
-      const dist=Math.hypot(dx,dz);
-
-      if(dist>2.1){
-        const speedEnemy=1.05;
-
-        enemy.group.position.x+=dx/dist*speedEnemy*dt;
-        enemy.group.position.z+=dz/dist*speedEnemy*dt;
-
-        enemy.group.rotation.y=Math.atan2(dx,dz);
+    for(const e of enemies){
+      if(!e.alive)continue;
+      const dx=player.position.x-e.group.position.x;
+      const dz=player.position.z-e.group.position.z;
+      const d=Math.hypot(dx,dz);
+      if(d>2){
+        e.group.position.x+=dx/d*dt;
+        e.group.position.z+=dz/d*dt;
       }else{
-        enemy.attackTimer-=dt;
-
-        if(enemy.attackTimer<=0){
+        e.cooldown-=dt;
+        if(e.cooldown<=0){
           health=Math.max(0,health-5);
-          enemy.attackTimer=1.0;
-          updateHUD();
+          e.cooldown=1;
+          hud();
         }
       }
     }
 
-    /* Automatic fire while held */
-
-    if(firing && now-lastShot>180){
-      shoot();
-      lastShot=now;
+    const now=performance.now();
+    if(firing&&now-lastShot>250){
+      lastShot=now;shoot();
     }
-
-    updateHUD();
-
-    if(health<=0){
-      showMessage('GAME OVER');
-    }
+    hud();
+    if(health<=0)message('GAME OVER');
   }
 
   updateCamera();
   renderer.render(scene,camera);
 }
 
-requestAnimationFrame(animate);
+async function init(){
+  try{
+    statusEl.textContent='Loading 3D engine...';
 
-/* ---------------- START ---------------- */
+    const THREE_MODULE=await import(
+      'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js'
+    );
+    THREE=THREE_MODULE;
 
-document.getElementById('play').addEventListener('click',()=>{
-  started=true;
-  document.getElementById('start').style.display='none';
-});
+    scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x8bb4cb);
+    scene.fog=new THREE.Fog(0x8bb4cb,45,150);
+
+    camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,250);
+
+    renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power'});
+    renderer.setSize(innerWidth,innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+    document.body.insertBefore(renderer.domElement,document.body.firstChild);
+
+    scene.add(new THREE.HemisphereLight(0xffffff,0x46533c,2));
+    const light=new THREE.DirectionalLight(0xffffff,2);
+    light.position.set(20,40,10);
+    scene.add(light);
+
+    createMap();
+    createPlayer();
+    setupEnemies();
+    loadSoldier();
+
+    updateCamera();
+    hud();
+    animate();
+
+    statusEl.textContent='Game ready. Press PLAY GAME.';
+  }catch(error){
+    console.error(error);
+    statusEl.textContent='3D engine error: '+error.message+
+      '. Internet check karo aur page refresh karo.';
+  }
+}
 
 window.addEventListener('resize',()=>{
+  if(!camera||!renderer)return;
   camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
 });
 
-updateHUD();
-
+init();
 </script>
 </body>
-   </html>
+  </html>
